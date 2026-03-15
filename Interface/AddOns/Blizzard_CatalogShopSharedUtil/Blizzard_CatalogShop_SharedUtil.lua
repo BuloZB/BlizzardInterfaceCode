@@ -312,6 +312,7 @@ function CatalogShopUtil.ExtractProductInfoForDisplayData(productInfo)
 		data.mainHandItemModifiedAppearanceID = productInfo.mainHandItemModifiedAppearanceID;
 		data.offHandItemModifiedAppearanceID = productInfo.offHandItemModifiedAppearanceID;
 		data.decorFileDataID = productInfo.decorFileDataID;
+		data.houseTextureAtlas = productInfo.houseTextureAtlas;
 	end
 	return data
 end
@@ -423,6 +424,7 @@ function CatalogShopUtil.TranslateProductInfoToProductDisplayData(productInfo, d
 	newDisplayData.mainHandItemModifiedAppearanceID = productData.mainHandItemModifiedAppearanceID or nil;
 	newDisplayData.offHandItemModifiedAppearanceID = productData.offHandItemModifiedAppearanceID or nil;
 	newDisplayData.decorFileDataID = productData.decorFileDataID or nil;
+	newDisplayData.houseTextureAtlas = productData.houseTextureAtlas or nil;
 
 	newDisplayData.specialActorID_1 = productInfo.specialActorID_1;
 	newDisplayData.specialActorID_2 = productInfo.specialActorID_2;
@@ -555,7 +557,7 @@ function CatalogShopUtil.SetupModelSceneForBundle(modelScene, modelSceneID, disp
 			nextPet = nextPet + 1;
 		elseif childDisplayData.productType == CatalogShopConstants.ProductType.Mount then
 			childDisplayData.modelSceneTag = CatalogShopConstants.DefaultActorTag.Mount .. tostring(nextMount);
-			-- RNMTODO : Look for transmog-rider#
+			-- Add support for transmog-rider#
 			local riderTag = "player-rider" .. tostring(nextMount);
 			local playerRiderActor = modelScene:GetActorByTag(riderTag);
 			childDisplayData.mountRiderTag = nil;
@@ -968,15 +970,17 @@ function CatalogShopUtil.CatalogShopTryOn(actor, itemModifiedAppearanceID, allow
 	end
 end
 
-function CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayData, isPlayerTransmogScene, tryUseOverrideAnim, isOverrideData)
+function CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayData, productType, tryUseOverrideAnim, isOverrideData)
 	if not actorDisplayData then
 		return;
 	end
 
-	actor:SetSheathed(actorDisplayData.sheatheWeapon, actorDisplayData.hideWeapon);
-	actor:SetAutoDress(actorDisplayData.autoDress);
+	if productType ~= CatalogShopConstants.ProductType.Decor then
+		actor:SetSheathed(actorDisplayData.sheatheWeapon, actorDisplayData.hideWeapon);
+		actor:SetAutoDress(actorDisplayData.autoDress);
+	end
 
-	if isPlayerTransmogScene then
+	if productType == CatalogShopConstants.ProductType.Transmog then
 		--[[  Transmogs have some unique fixups that are required ]]--
 		local hasAlternateForm = false;
 		if not C_Glue.IsOnGlueScreen() then
@@ -1065,7 +1069,6 @@ function CatalogShopUtil.UpdateModelSceneWithDisplayData(modelScene, displayData
 
 	-- APPLY CHANGES TO ACTOR
 	local productType = displayData.productType;
-	local isTransmogScene = false;
 	local actorDisplayBucket = displayData.actorDisplayBucket;
 	local actorDisplayData;
 	local actor;
@@ -1081,7 +1084,6 @@ function CatalogShopUtil.UpdateModelSceneWithDisplayData(modelScene, displayData
 
 	if productType == CatalogShopConstants.ProductType.Transmog then
 		actor = modelScene.CachedPlayerActor;
-		isTransmogScene = true;
 	elseif modelSceneTag ~= nil then
 		actor = modelScene:GetActorByTag(modelSceneTag);
 		for i, actorDisplayDataFromBucket in ipairs(actorDisplayBucket) do
@@ -1094,10 +1096,10 @@ function CatalogShopUtil.UpdateModelSceneWithDisplayData(modelScene, displayData
 
 	local overrideActorDiplayData = displayData.overrideActorDisplayBucket and displayData.overrideActorDisplayBucket[1] or nil;
 	if actor then
-		CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayData, isTransmogScene, tryUseOverrideAnim)
+		CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayData, productType, tryUseOverrideAnim)
 		if overrideActorDiplayData then
 			local isOverrideData = true;
-			CatalogShopUtil.UpdateActorWithDisplayData(actor, overrideActorDiplayData, isTransmogScene, tryUseOverrideAnim, isOverrideData)
+			CatalogShopUtil.UpdateActorWithDisplayData(actor, overrideActorDiplayData, productType, tryUseOverrideAnim, isOverrideData)
 		end
 	else
 		if not actorDisplayBucket then
@@ -1106,10 +1108,10 @@ function CatalogShopUtil.UpdateModelSceneWithDisplayData(modelScene, displayData
 		for i, actorDisplayDataFromBucket in ipairs(actorDisplayBucket) do
 			actor = modelScene:GetActorByTag(actorDisplayDataFromBucket.scriptTag);
 			if actor then
-				CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayDataFromBucket, isTransmogScene, tryUseOverrideAnim)
+				CatalogShopUtil.UpdateActorWithDisplayData(actor, actorDisplayDataFromBucket, productType, tryUseOverrideAnim)
 				if overrideActorDiplayData then
 					local isOverrideData = true;
-					CatalogShopUtil.UpdateActorWithDisplayData(actor, overrideActorDiplayData, isTransmogScene, tryUseOverrideAnim, isOverrideData)
+					CatalogShopUtil.UpdateActorWithDisplayData(actor, overrideActorDiplayData, productType, tryUseOverrideAnim, isOverrideData)
 				end
 			end
 		end
@@ -1343,4 +1345,38 @@ function CatalogShopUtil.GetProductInfo(productID)
 	end
 
 	return productInfo;
+end
+
+function CatalogShopUtil.GetCardTemplate(useWideCard, productType)
+	if useWideCard then
+		if productType == CatalogShopConstants.ProductType.Token then
+			return CatalogShopConstants.CardTemplate.WideCardToken;
+		elseif productType == CatalogShopConstants.ProductType.Subscription then
+			return CatalogShopConstants.CardTemplate.WideCardSubscription;
+		elseif productType == CatalogShopConstants.ProductType.GameTime then
+			return CatalogShopConstants.CardTemplate.WideCardGameTime;
+		end
+
+		return CatalogShopConstants.CardTemplate.Wide;
+	end
+
+	if productType == CatalogShopConstants.ProductType.Services then
+		return CatalogShopConstants.CardTemplate.SmallServices;
+	elseif productType == CatalogShopConstants.ProductType.Subscription then
+		return CatalogShopConstants.CardTemplate.SmallSubscriptions;
+	elseif productType == CatalogShopConstants.ProductType.GameTime then
+		return CatalogShopConstants.CardTemplate.SmallGameTime;
+	elseif productType == CatalogShopConstants.ProductType.Tender then
+		return CatalogShopConstants.CardTemplate.SmallTender;
+	elseif productType == CatalogShopConstants.ProductType.Toy then
+		return CatalogShopConstants.CardTemplate.SmallToys;
+	elseif productType == CatalogShopConstants.ProductType.Decor then
+		return CatalogShopConstants.CardTemplate.SmallDecor;
+	elseif productType == CatalogShopConstants.ProductType.Access then
+		return CatalogShopConstants.CardTemplate.SmallAccess;
+	elseif productType == CatalogShopConstants.ProductType.Room then
+		return CatalogShopConstants.CardTemplate.SmallRoom;
+	end
+
+	return CatalogShopConstants.CardTemplate.Small;
 end

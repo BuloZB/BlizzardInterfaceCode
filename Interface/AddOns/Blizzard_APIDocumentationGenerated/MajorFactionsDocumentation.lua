@@ -240,6 +240,7 @@ local MajorFactions =
 				{ Name = "unlockDescription", Type = "cstring", Nilable = true },
 				{ Name = "uiPriority", Type = "number", Nilable = false },
 				{ Name = "renownLevel", Type = "number", Nilable = false },
+				{ Name = "maxLevel", Type = "number", Nilable = false },
 				{ Name = "renownReputationEarned", Type = "number", Nilable = false },
 				{ Name = "renownLevelThreshold", Type = "number", Nilable = false },
 				{ Name = "textureKit", Type = "textureKit", Nilable = false },
@@ -292,6 +293,7 @@ local MajorFactions =
 				{ Name = "description", Type = "cstring", Nilable = true },
 				{ Name = "toastDescription", Type = "cstring", Nilable = true },
 				{ Name = "rewardType", Type = "number", Nilable = true },
+				{ Name = "isCollected", Type = "bool", Nilable = true },
 			},
 		},
 		{
@@ -304,6 +306,9 @@ local MajorFactions =
 				{ Name = "level", Type = "number", Nilable = false },
 			},
 		},
+	},
+	Predicates =
+	{
 	},
 };
 

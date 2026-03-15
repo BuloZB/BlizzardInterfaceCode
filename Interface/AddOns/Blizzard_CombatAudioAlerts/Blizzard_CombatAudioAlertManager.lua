@@ -838,16 +838,21 @@ function CombatAudioAlertManagerMixin:ProcessCastState(unit, spellID, isChannele
 			spellName, _, _, startTimeMs, endTimeMs, _, _, notInterruptible = UnitCastingInfo(unit);
 		end
 
-		castTimeMs = endTimeMs - startTimeMs;
+		if startTimeMs and endTimeMs then
+			castTimeMs = endTimeMs - startTimeMs;
+		end
 
 		local shouldCheckInterrupt = (unit == "target") and self:IsInterruptCastEnabled();
 		if shouldCheckInterrupt then
-			if not notInterruptible then
+			local isInterruptible = (notInterruptible == false);
+			if isInterruptible then
 				addonTable.SpeakText(CAA_INTERRUPTIBLE_CAST_TEXT, Enum.CombatAudioAlertCategory.General);
 				return;
 			end
 		end
-	else
+	end
+
+	if not spellName or not castTimeMs then
 		local spellInfo = C_Spell.GetSpellInfo(spellID);
 		if not spellInfo then
 			return;
@@ -1011,7 +1016,7 @@ end
 
 function addonTable:OnThrottleTimerComplete(throttleType)
 	local throttleInfo = self.throttles[throttleType];
-	if throttleInfo then
+	if throttleInfo and throttleInfo.timer then
 		--print("throttle "..throttleType.." complete");
 		throttleInfo.timer:Cancel();
 		throttleInfo.timer = nil;

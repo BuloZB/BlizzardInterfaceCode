@@ -1517,7 +1517,7 @@ end
 
 function TalentFrameBaseMixin:SetCommitCastBarActive(active)
 	if active then
-		OverlayPlayerCastingBarFrame:StartReplacingPlayerBarAt(self.DisabledOverlay, { overrideBarType = "applyingtalents" });
+		OverlayPlayerCastingBarFrame:StartReplacingPlayerBarAt(self.DisabledOverlay, { overrideBarType = CastingBarType.ApplyingTalents });
 	else
 		OverlayPlayerCastingBarFrame:EndReplacingPlayerBar();
 	end
@@ -1534,7 +1534,7 @@ function TalentFrameBaseMixin:SetCommitVisualsActive(active, reason, skipSpinner
 
 	self.areBaseCommitVisualsActive = active;
 
-	self.DisabledOverlay:SetShown(active);
+	self:SetDisabledOverlayShown(active);
 
 	if self.enableCommitCastBar then
 		self:SetCommitCastBarActive(active);

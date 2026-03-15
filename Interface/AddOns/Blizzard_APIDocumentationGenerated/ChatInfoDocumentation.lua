@@ -555,13 +555,14 @@ local ChatInfo =
 			Name = "SendChatMessage",
 			Type = "Function",
 			HasRestrictions = true,
+			RestrictedForMacroChatMessages = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
 			{
-				{ Name = "message", Type = "cstring", Nilable = false },
-				{ Name = "chatType", Type = "SendChatMessageType", Nilable = true, Documentation = { "Chat type string ('SAY', 'EMOTE', etc.). Defaults to 'SAY' if not specified." } },
-				{ Name = "languageID", Type = "number", Nilable = true, Documentation = { "Language to send the message in." } },
+				{ Name = "message", Type = "cstring", Nilable = false, NeverSecret = true },
+				{ Name = "chatType", Type = "SendChatMessageType", Nilable = true, NeverSecret = true, Documentation = { "Chat type string ('SAY', 'EMOTE', etc.). Defaults to 'SAY' if not specified." } },
+				{ Name = "languageID", Type = "number", Nilable = true, NeverSecret = true, Documentation = { "Language to send the message in." } },
 				{ Name = "target", Type = "cstring", Nilable = true, Documentation = { "Name of the player to send a message to. Only applies to chat types that support targeted messages." } },
 			},
 		},
@@ -2755,11 +2756,20 @@ local ChatInfo =
 			Type = "Structure",
 			Fields =
 			{
-				{ Name = "message", Type = "cstring", Nilable = false },
-				{ Name = "chatType", Type = "SendChatMessageType", Nilable = true, Documentation = { "Chat type string ('SAY', 'EMOTE', etc.). Defaults to 'SAY' if not specified." } },
-				{ Name = "languageID", Type = "number", Nilable = true, Documentation = { "Language to send the message in." } },
+				{ Name = "message", Type = "cstring", Nilable = false, NeverSecret = true },
+				{ Name = "chatType", Type = "SendChatMessageType", Nilable = true, NeverSecret = true, Documentation = { "Chat type string ('SAY', 'EMOTE', etc.). Defaults to 'SAY' if not specified." } },
+				{ Name = "languageID", Type = "number", Nilable = true, NeverSecret = true, Documentation = { "Language to send the message in." } },
 				{ Name = "target", Type = "cstring", Nilable = true, Documentation = { "Name of the player to send a message to. Only applies to chat types that support targeted messages." } },
 			},
+		},
+	},
+	Predicates =
+	{
+		{
+			Name = "RestrictedForMacroChatMessages",
+			Type = "Precondition",
+			FailureMode = "ReturnNothing",
+			Documentation = { "Restricts sending chat messages on chat types that can be observed by external players. Only applies during instance encounters for messages initiated from macros." },
 		},
 	},
 };

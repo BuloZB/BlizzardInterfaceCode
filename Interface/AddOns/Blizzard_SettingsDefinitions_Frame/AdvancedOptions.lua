@@ -323,6 +323,7 @@ local function Register()
 			ShowDesiredPanelFromSettingsPanel(EditModeManagerFrame);
 		end
 		local editModeInitializer = CreateSettingsButtonInitializer("", COOLDOWN_VIEWER_OPTIONS_OPEN_EDIT_MODE, OpenEditMode, nil, addSearchTags);
+		editModeInitializer:AddSearchTags(COOLDOWN_VIEWER_LABEL);
 		layout:AddInitializer(editModeInitializer);
 
 		-- Open Cooldown Manager
@@ -331,6 +332,7 @@ local function Register()
 		end
 
 		local managerInitializer = CreateSettingsButtonInitializer("", HUD_EDIT_MODE_COOLDOWN_VIEWER_SETTINGS, OpenCooldownManager, nil, addSearchTags, "ADVANCED_COOLDOWN_SETTINGS");
+		managerInitializer:AddSearchTags(COOLDOWN_VIEWER_LABEL);
 		layout:AddInitializer(managerInitializer);
 	end);
 
@@ -365,7 +367,7 @@ local function Register()
 		end
 
 		Settings.SetupCVarCheckbox(category, "damageMeterEnabled", ENABLE_DAMAGE_METER, TooltipFn);
-		--[[
+		
 		-- Damage Meter reset on new instance checkbox
 		local function AutoResetTooltipFn()
 			local isAvailable, failureReason = C_DamageMeter.IsDamageMeterAvailable();
@@ -377,7 +379,6 @@ local function Register()
 		end
 
 		Settings.SetupCVarCheckbox(category, "damageMeterResetOnNewInstance", AUTO_RESET_DAMAGE_METER, AutoResetTooltipFn);
-		]]--
 	end);
 
 	-- Spell Diminishing Returns

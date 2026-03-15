@@ -225,6 +225,7 @@ local CatalogShop =
 		{
 			Name = "GetProductInfo",
 			Type = "Function",
+			HasRestrictions = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -261,12 +262,13 @@ local CatalogShop =
 
 			Arguments =
 			{
-				{ Name = "productIDOpt", Type = "number", Nilable = true },
+				{ Name = "productIdFilterOpt", Type = "number", Nilable = true },
 			},
 
 			Returns =
 			{
 				{ Name = "refundableDecorInfos", Type = "table", InnerType = "RefundableDecorInfo", Nilable = false },
+				{ Name = "minTimeRemainingSeconds", Type = "time_t", Nilable = false },
 			},
 		},
 		{
@@ -330,6 +332,21 @@ local CatalogShop =
 			Returns =
 			{
 				{ Name = "hasNewProducts", Type = "bool", Nilable = false },
+			},
+		},
+		{
+			Name = "IsProductIncludedInAnyBundle",
+			Type = "Function",
+			SecretArguments = "AllowedWhenUntainted",
+
+			Arguments =
+			{
+				{ Name = "productID", Type = "number", Nilable = false },
+			},
+
+			Returns =
+			{
+				{ Name = "isIncludedInAnyBundle", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -403,6 +420,7 @@ local CatalogShop =
 		{
 			Name = "PurchaseProduct",
 			Type = "Function",
+			HasRestrictions = true,
 			SecretArguments = "AllowedWhenUntainted",
 
 			Arguments =
@@ -427,6 +445,15 @@ local CatalogShop =
 			Arguments =
 			{
 				{ Name = "currencyCode", Type = "string", Nilable = false },
+			},
+		},
+		{
+			Name = "ShouldShowHousingWarning",
+			Type = "Function",
+
+			Returns =
+			{
+				{ Name = "shouldShowHousingWarning", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -520,16 +547,6 @@ local CatalogShop =
 			Payload =
 			{
 				{ Name = "checkoutID", Type = "number", Nilable = false },
-			},
-		},
-		{
-			Name = "CatalogShopPmtImageDownloaded",
-			Type = "Event",
-			LiteralName = "CATALOG_SHOP_PMT_IMAGE_DOWNLOADED",
-			SynchronousEvent = true,
-			Payload =
-			{
-				{ Name = "catalogProductID", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -649,6 +666,7 @@ local CatalogShop =
 			{
 				{ Name = "childProductID", Type = "number", Nilable = false },
 				{ Name = "displayOrder", Type = "number", Nilable = false },
+				{ Name = "quantityInBundle", Type = "number", Nilable = false },
 			},
 		},
 		{
@@ -687,6 +705,7 @@ local CatalogShop =
 				{ Name = "itemDescription", Type = "string", Nilable = true },
 				{ Name = "hasUnknownLicense", Type = "bool", Nilable = false },
 				{ Name = "productPMTURL", Type = "string", Nilable = true },
+				{ Name = "additionalProductPMTURLs", Type = "table", InnerType = "string", Nilable = false },
 				{ Name = "otherProductImageAtlasName", Type = "string", Nilable = true },
 				{ Name = "otherProductGameTitleBaseTag", Type = "string", Nilable = true },
 				{ Name = "otherProductGameType", Type = "string", Nilable = true },
@@ -701,6 +720,7 @@ local CatalogShop =
 				{ Name = "gameFlavorID", Type = "number", Nilable = true },
 				{ Name = "decorFileDataID", Type = "number", Nilable = true },
 				{ Name = "quantity", Type = "number", Nilable = true },
+				{ Name = "houseTextureAtlas", Type = "textureAtlas", Nilable = true },
 			},
 		},
 		{
@@ -746,8 +766,9 @@ local CatalogShop =
 				{ Name = "isDynamicallyDiscounted", Type = "bool", Nilable = false },
 				{ Name = "shouldShowOriginalPrice", Type = "bool", Nilable = false },
 				{ Name = "wideCardBGOverrideProductURL", Type = "string", Nilable = true },
-				{ Name = "consumableQuantity", Type = "number", Nilable = true },
+				{ Name = "decorQuantity", Type = "DecorQuantity", Nilable = true },
 				{ Name = "isVCProduct", Type = "bool", Nilable = false },
+				{ Name = "containsHousingItem", Type = "bool", Nilable = false },
 			},
 		},
 		{
@@ -802,6 +823,15 @@ local CatalogShop =
 			},
 		},
 		{
+			Name = "DecorQuantity",
+			Type = "Structure",
+			Fields =
+			{
+				{ Name = "placedQuantity", Type = "number", Nilable = false },
+				{ Name = "storedQuantity", Type = "number", Nilable = false },
+			},
+		},
+		{
 			Name = "RefundableDecorInfo",
 			Type = "Structure",
 			Fields =
@@ -812,6 +842,9 @@ local CatalogShop =
 				{ Name = "price", Type = "string", Nilable = false },
 			},
 		},
+	},
+	Predicates =
+	{
 	},
 };
 
